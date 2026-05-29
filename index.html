@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Свидание?</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #fbc2eb, #a6c1ee);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        .card {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(8px);
+            padding: 2rem 3rem;
+            border-radius: 60px;
+            width: 90%;
+            max-width: 600px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: #2c2b47;
+            margin-bottom: 2.5rem;
+        }
+
+        .buttons {
+            position: relative;
+            display: flex;
+            justify-content: space-between;
+            min-height: 100px;
+            gap: 30px;
+        }
+
+        button {
+            font-size: 2rem;
+            font-weight: bold;
+            padding: 12px 32px;
+            border: none;
+            border-radius: 60px;
+            cursor: pointer;
+            transition: 0.1s;
+            font-family: inherit;
+        }
+
+        .yes {
+            background: #ffb7c5;
+            color: #6b1e3a;
+            box-shadow: 0 5px 0 #b34d6e;
+        }
+
+        .yes:active {
+            transform: translateY(3px);
+        }
+
+        .no {
+            background: #cbd5e6;
+            color: #2d3e50;
+            position: static;
+        }
+
+        /* Убегающая кнопка */
+        .no.escape {
+            position: absolute;
+            transition: left 0.08s ease, top 0.08s ease;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 40px;
+            text-align: center;
+            font-size: 1.8rem;
+            color: #b13e6b;
+            font-weight: bold;
+        }
+
+        .modal-content button {
+            margin-top: 20px;
+            font-size: 1.2rem;
+            padding: 8px 24px;
+            background: #ff98b9;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+<div class="card">
+    <h1>✨ Ты пойдёшь со мной на свидание? ✨</h1>
+    <div class="buttons" id="buttons">
+        <button class="yes" id="yesBtn">💖 ДА 💖</button>
+        <button class="no" id="noBtn">😿 НЕТ 😿</button>
+    </div>
+</div>
+
+<div id="modal" class="modal">
+    <div class="modal-content">
+        🎉 Ура! Было неожиданно, что ты нажмёшь на ДА! 🎉
+        <button id="closeModal">💕 Закрыть 💕</button>
+    </div>
+</div>
+
+<script>
+    const yesBtn = document.getElementById('yesBtn');
+    const noBtn = document.getElementById('noBtn');
+    const modal = document.getElementById('modal');
+    const closeModal = document.getElementById('closeModal');
+    const container = document.getElementById('buttons');
+
+    // Функция убегания
+    function escapeNo() {
+        if (noBtn.classList.contains('escape')) {
+            // Если уже убегает - просто меняем позицию
+            const rect = container.getBoundingClientRect();
+            const btnRect = noBtn.getBoundingClientRect();
+            const maxLeft = rect.width - btnRect.width - 10;
+            const maxTop = rect.height - btnRect.height - 10;
+            const left = Math.max(5, Math.random() * maxLeft);
+            const top = Math.max(5, Math.random() * maxTop);
+            noBtn.style.left = left + 'px';
+            noBtn.style.top = top + 'px';
+        } else {
+            // Первый побег - делаем абсолютным
+            noBtn.classList.add('escape');
+            noBtn.style.position = 'absolute';
+            noBtn.style.margin = '0';
+            const rect = container.getBoundingClientRect();
+            const btnRect = noBtn.getBoundingClientRect();
+            const maxLeft = rect.width - btnRect.width - 10;
+            const maxTop = rect.height - btnRect.height - 10;
+            noBtn.style.left = Math.max(5, Math.random() * maxLeft) + 'px';
+            noBtn.style.top = Math.max(5, Math.random() * maxTop) + 'px';
+        }
+    }
+
+    // При наведении на "Нет" - убегает
+    noBtn.addEventListener('mouseenter', escapeNo);
+    noBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        escapeNo();
+    });
+
+    // Кнопка "Да" открывает окно
+    yesBtn.addEventListener('click', () => {
+        modal.style.display = 'flex';
+    });
+
+    closeModal.addEventListener('click', () => {
+        modal.style.display = 'none';
+    });
+
+    // Закрытие по клику вне окна
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.style.display = 'none';
+    });
+</script>
+</body>
+  </html>
