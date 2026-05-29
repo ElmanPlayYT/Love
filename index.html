@@ -2,13 +2,14 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Свидание?</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
@@ -24,34 +25,33 @@
             text-align: center;
             background: rgba(255, 255, 255, 0.2);
             backdrop-filter: blur(8px);
-            padding: 2rem 3rem;
+            padding: 2rem 2rem;
             border-radius: 60px;
             width: 90%;
             max-width: 600px;
         }
 
         h1 {
-            font-size: 2.5rem;
+            font-size: 2rem;
             color: #2c2b47;
-            margin-bottom: 2.5rem;
+            margin-bottom: 2rem;
         }
 
         .buttons {
             position: relative;
             display: flex;
             justify-content: space-between;
-            min-height: 100px;
-            gap: 30px;
+            min-height: 130px;
+            gap: 20px;
         }
 
         button {
-            font-size: 2rem;
+            font-size: 1.8rem;
             font-weight: bold;
-            padding: 12px 32px;
+            padding: 12px 28px;
             border: none;
             border-radius: 60px;
             cursor: pointer;
-            transition: 0.1s;
             font-family: inherit;
         }
 
@@ -59,6 +59,7 @@
             background: #ffb7c5;
             color: #6b1e3a;
             box-shadow: 0 5px 0 #b34d6e;
+            transition: 0.05s linear;
         }
 
         .yes:active {
@@ -68,10 +69,20 @@
         .no {
             background: #cbd5e6;
             color: #2d3e50;
-            position: static;
+            transition: none;
+            box-shadow: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        /* Убегающая кнопка */
+        .no:active,
+        .no:focus,
+        .no:hover {
+            transform: none;
+            background: #cbd5e6;
+            box-shadow: none;
+            outline: none;
+        }
+
         .no.escape {
             position: absolute;
             transition: left 0.08s ease, top 0.08s ease;
@@ -84,7 +95,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0, 0, 0, 0.5);
             backdrop-filter: blur(4px);
             align-items: center;
             justify-content: center;
@@ -96,9 +107,10 @@
             padding: 2rem;
             border-radius: 40px;
             text-align: center;
-            font-size: 1.8rem;
+            font-size: 1.5rem;
             color: #b13e6b;
             font-weight: bold;
+            margin: 20px;
         }
 
         .modal-content button {
@@ -107,6 +119,19 @@
             padding: 8px 24px;
             background: #ff98b9;
             color: white;
+            border: none;
+            border-radius: 40px;
+            cursor: pointer;
+        }
+
+        @media (max-width: 600px) {
+            button {
+                font-size: 1.4rem;
+                padding: 10px 20px;
+            }
+            h1 {
+                font-size: 1.5rem;
+            }
         }
     </style>
 </head>
@@ -115,7 +140,7 @@
     <h1>✨ Ты пойдёшь со мной на свидание? ✨</h1>
     <div class="buttons" id="buttons">
         <button class="yes" id="yesBtn">💖 ДА 💖</button>
-        <button class="no" id="noBtn">😿 НЕТ 😿</button>
+        <button class="no" id="noBtn">💩 НЕТ 💩</button>
     </div>
 </div>
 
@@ -127,58 +152,77 @@
 </div>
 
 <script>
-    const yesBtn = document.getElementById('yesBtn');
-    const noBtn = document.getElementById('noBtn');
-    const modal = document.getElementById('modal');
-    const closeModal = document.getElementById('closeModal');
-    const container = document.getElementById('buttons');
+    (function() {
+        const yesBtn = document.getElementById('yesBtn');
+        const noBtn = document.getElementById('noBtn');
+        const modal = document.getElementById('modal');
+        const closeModal = document.getElementById('closeModal');
+        const container = document.getElementById('buttons');
 
-    // Функция убегания
-    function escapeNo() {
-        if (noBtn.classList.contains('escape')) {
-            // Если уже убегает - просто меняем позицию
-            const rect = container.getBoundingClientRect();
-            const btnRect = noBtn.getBoundingClientRect();
-            const maxLeft = rect.width - btnRect.width - 10;
-            const maxTop = rect.height - btnRect.height - 10;
-            const left = Math.max(5, Math.random() * maxLeft);
-            const top = Math.max(5, Math.random() * maxTop);
-            noBtn.style.left = left + 'px';
-            noBtn.style.top = top + 'px';
-        } else {
-            // Первый побег - делаем абсолютным
-            noBtn.classList.add('escape');
-            noBtn.style.position = 'absolute';
-            noBtn.style.margin = '0';
-            const rect = container.getBoundingClientRect();
-            const btnRect = noBtn.getBoundingClientRect();
-            const maxLeft = rect.width - btnRect.width - 10;
-            const maxTop = rect.height - btnRect.height - 10;
-            noBtn.style.left = Math.max(5, Math.random() * maxLeft) + 'px';
-            noBtn.style.top = Math.max(5, Math.random() * maxTop) + 'px';
+        function getRandomPosition(btn, containerEl) {
+            const containerRect = containerEl.getBoundingClientRect();
+            const btnRect = btn.getBoundingClientRect();
+            
+            const maxLeft = Math.max(5, containerRect.width - btnRect.width - 10);
+            const maxTop = Math.max(5, containerRect.height - btnRect.height - 10);
+            
+            if (maxLeft <= 0 || maxTop <= 0) {
+                return { left: 5, top: 5 };
+            }
+            
+            return {
+                left: Math.random() * maxLeft,
+                top: Math.random() * maxTop
+            };
         }
-    }
 
-    // При наведении на "Нет" - убегает
-    noBtn.addEventListener('mouseenter', escapeNo);
-    noBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        escapeNo();
-    });
+        function escapeNoButton() {
+            if (!noBtn.classList.contains('escape')) {
+                noBtn.classList.add('escape');
+                noBtn.style.position = 'absolute';
+                noBtn.style.margin = '0';
+            }
+            
+            const pos = getRandomPosition(noBtn, container);
+            noBtn.style.left = pos.left + 'px';
+            noBtn.style.top = pos.top + 'px';
+        }
 
-    // Кнопка "Да" открывает окно
-    yesBtn.addEventListener('click', () => {
-        modal.style.display = 'flex';
-    });
-
-    closeModal.addEventListener('click', () => {
-        modal.style.display = 'none';
-    });
-
-    // Закрытие по клику вне окна
-    modal.addEventListener('click', (e) => {
-        if (e.target === modal) modal.style.display = 'none';
-    });
+        noBtn.addEventListener('mouseenter', escapeNoButton);
+        
+        noBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            escapeNoButton();
+            return false;
+        });
+        
+        noBtn.addEventListener('mousedown', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            escapeNoButton();
+            return false;
+        });
+        
+        noBtn.addEventListener('touchstart', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            escapeNoButton();
+            return false;
+        });
+        
+        yesBtn.addEventListener('click', function() {
+            modal.style.display = 'flex';
+        });
+        
+        closeModal.addEventListener('click', function() {
+            modal.style.display = 'none';
+        });
+        
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) modal.style.display = 'none';
+        });
+    })();
 </script>
 </body>
-  </html>
+</html>
